@@ -4,7 +4,6 @@ var express = require('express');
 var articleController = require('../controllers/article');
 var router = express.Router();
 
-var express = require('express');
 var multer  = require('multer');
 var upload = multer({ dest: 'uploads/' });
 
