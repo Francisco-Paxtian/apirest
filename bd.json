@@ -1,0 +1,11 @@
+{
+    "_comment"      : "base datos documentales | colecion de administrador",
+    "_id"           : "id",
+    "firts_name"    : "nombre",
+    "last_name"     : "apelldios",
+    "email"         : "correo electronico",
+    "password"      : "contraseña"    
+}
+
+
+
