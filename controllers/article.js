@@ -1,273 +1,276 @@
 'use strict'
 
 var validator = require('validator');
-const { request } = require('../app');
-var Article   = require('../models/article');
+var fs = require('fs');
+var Article = require('../models/article');
 var path = require('path');
 
 var controller = {
 
-    
-    dato_curso :  (request, response) => {
-    
+
+    dato_curso: (request, response) => {
+
         return response.status(200).send({
-            curso : 'Master framework js',
-            autor : 'Francisco',
-            url : 'paxtian.mx' 
+            curso: 'Master framework js',
+            autor: 'Francisco',
+            url: 'paxtian.mx'
         });
     },
 
-    testing : (request, response) => {
+    testing: (request, response) => {
 
         return response.status(200).send({
-            message : 'testing message'
+            message: 'testing message'
         });
     },
-    
-    save : (request, response) => {
-        
+
+    save: (request, response) => {
+
         //post
         var params = request.body;
         console.log(params);
         //validator
         try {
-            var validate_title   = !validator.isEmpty(params.title);
+            var validate_title = !validator.isEmpty(params.title);
             var validate_content = !validator.isEmpty(params.content);
         } catch (error) {
             log.error(error);
             return response.status(200).send({
-                status : 'error',
-                message : 'faltan datos'
-            });   
-        }        
-        if(validate_title && validate_content){
-            
+                status: 'error',
+                message: 'faltan datos'
+            });
+        }
+        if (validate_title && validate_content) {
+
             //object
             var article = new Article();
 
             //set
-            article.title   = params.title;
+            article.title = params.title;
             article.content = params.content;
-            article.image   = null;
+            article.image = null;
 
             //save bd
-            article.save((err, article_stored) =>{
-                if(err || !article_stored){
+            article.save((err, article_stored) => {
+                if (err || !article_stored) {
                     return response.status(404).send({
-                        status : 'error',
-                        message : 'no se a guardado'
-                    });  
+                        status: 'error',
+                        message: 'no se a guardado'
+                    });
                 }
 
                 return response.status(200).send({
-                    status  : 'successfull',
-                    article : article_stored
-                }); 
+                    status: 'successfull',
+                    article: article_stored
+                });
             });
-            
-            
-        }else{
+
+
+        } else {
             return response.status(200).send({
-                status : 'error',
-                message : 'los datos no son validos'
-            }); 
+                status: 'error',
+                message: 'los datos no son validos'
+            });
         }
     },
-    get_articles : (request,response) =>{
+    get_articles: (request, response) => {
         //last
 
         var query = Article.find({});
-        var last  = request.params.last;
-        
-        if(last || last != undefined){
+        var last = request.params.last;
+
+        if (last || last != undefined) {
             query.limit(5);
         }
         //find 
-        query.sort('-_id').exec((err, articles) =>{
-            
-            if(err){
+        query.sort('-_id').exec((err, articles) => {
+
+            if (err) {
                 return response.status(500).send({
-                    status  : 'error',
-                    message : 'no se pudo regresar los articulos'
+                    status: 'error',
+                    message: 'no se pudo regresar los articulos'
                 });
             }
 
-            if(!articles){
+            if (!articles) {
                 return response.status(404).send({
-                    status  : 'error',
-                    message : 'no hay articulos'
+                    status: 'error',
+                    message: 'no hay articulos'
                 });
             }
-            
+
             return response.status(200).send({
-                status : 'successfull',
+                status: 'successfull',
                 articles
             });
         });
-        
+
     },
-    get_article : (request,response) =>{
-        
+    get_article: (request, response) => {
+
         //get id
-        var article_id = request.params.id;        
+        var article_id = request.params.id;
         //validator
-        if(!article_id || article_id == null){
+        if (!article_id || article_id == null) {
             return response.status(404).send({
-                status  : 'error',
-                message : 'no existe el articulo'
+                status: 'error',
+                message: 'no existe el articulo'
             });
-        }  
+        }
         //search bd     
-        Article.findById(article_id, (err, article) =>{            
-            if(err || !article){
+        Article.findById(article_id, (err, article) => {
+            if (err || !article) {
                 return response.status(404).send({
-                    status  : 'error',
-                    message : 'no existe el articulo'
+                    status: 'error',
+                    message: 'no existe el articulo'
                 });
             }
             //get
-            return response.status(500).send({
-                status  : 'successfull',
+            return response.status(202).send({
+                status: 'successfull',
                 article
             });
-        });                        
+        });
     },
-    update_article : (request, response) => {
-        
+    update_article: (request, response) => {
+
         //get id
         var article_id = request.params.id;
 
         //put 
         var params = request.body;
-        
+
         //validator
         try {
 
-            var validate_title   = !validator.isEmpty(params.title);
+            var validate_title = !validator.isEmpty(params.title);
             var validate_content = !validator.isEmpty(params.content);
-            
 
-            if(validate_title && validate_content){
+
+            if (validate_title && validate_content) {
                 //find and update
-                Article.findByIdAndUpdate({_id: article_id}, params, {new: true}, (err, article_update) =>{
-                    if(err){
+                Article.findByIdAndUpdate({ _id: article_id }, params, { new: true }, (err, article_update) => {
+                    if (err) {
                         return response.status(404).send({
-                            status  : 'error',
-                            message : 'error al actulizar',
+                            status: 'error',
+                            message: 'error al actulizar',
                             err
                         });
                     }
-                    if(!article_update){
+                    if (!article_update) {
                         return response.status(404).send({
-                            status  : 'error',
-                            message : 'no existe el articulo'
+                            status: 'error',
+                            message: 'no existe el articulo'
                         });
                     }
                     return response.status(404).send({
-                        status  : 'successfull',
+                        status: 'successfull',
                         article_update
                     });
                 });
                 //get
-            }else{
+            } else {
                 return response.status(404).send({
-                    status  : 'error',
-                    message : 'validacion incorrecta'
+                    status: 'error',
+                    message: 'validacion incorrecta'
                 });
             }
-            
+
         } catch (error) {
             return response.status(404).send({
-                status  : 'error',
-                message : 'faltan datos'
+                status: 'error',
+                message: 'faltan datos'
             });
         }
 
-        
+
 
     },
-    delete : (request, response) => {
+    delete: (request, response) => {
 
         //get id
         var article_id = request.params.id;
 
         //find and delete
-        Article.findByIdAndDelete({_id: article_id}, (err, article_remove) =>{
-            if(err){
+        Article.findByIdAndDelete({ _id: article_id }, (err, article_remove) => {
+            if (err) {
                 return response.status(404).send({
-                    status  : 'error',
-                    message : 'error al borrar'
+                    status: 'error',
+                    message: 'error al borrar'
                 });
             }
-            if(!article_remove){
+            if (!article_remove) {
                 return response.status(404).send({
-                    status  : 'error',
-                    message : 'el articulo no existe'
+                    status: 'error',
+                    message: 'el articulo no existe'
                 });
             }
             return response.status(200).send({
-                status  : 'successfull',
+                status: 'successfull',
                 article_remove
-            });            
-        })        
+            });
+        })
     },
-    upload_image : (request, response) =>{
-        
-        
-        var file_name = "error al subir la imagen...";
+    upload_image:  (req, res) => {
 
-        
-        return response.status(200).send({
-            message : "udload"              
-        });        
-        
+        console.log(req);
+        res.json({ status: req.file })
+        //var img = fs.readFileSync(req.file.path);
+        //var encode_image = img.toString('base64');                
+        //res.json({ status: req.body})
+        //var file =  req.body.imageUrl
+        //var a =  req.file
+        //res.json({ status: req.body["file0"] })
+        //console.log(req.query.name);
+
+
 
     },
-    search : (request, response) =>{
+    search: (request, response) => {
 
         //string 
         var search_string = request.params.search;
 
-        
+
         //find or
         try {
             Article.find({
-                '$or' : [
-                     {'title': { '$regex': search_string, '$options': 'i'}},
-                     {'content': { '$regex': search_string, '$options': 'i'}},
+                '$or': [
+                    { 'title': { '$regex': search_string, '$options': 'i' } },
+                    { 'content': { '$regex': search_string, '$options': 'i' } },
                 ]
             })
-            .sort([['date','descending']])
-            .exec((err, articles) =>{
-    
-                if(err){
-                 
-                    return response.status(404).send({
-                        message : 'error',
-                        message : 'error en la peticion'
+                .sort([['date', 'descending']])
+                .exec((err, articles) => {
+
+                    if (err) {
+
+                        return response.status(404).send({
+                            message: 'error',
+                            message: 'error en la peticion'
+                        });
+
+                    }
+                    if (!articles || articles.length <= 0) {
+
+                        return response.status(404).send({
+                            message: 'error',
+                            message: 'no hay articulos para mostras'
+                        });
+
+                    }
+                    return response.status(200).send({
+                        message: 'successfull',
+                        articles
                     });
-    
-                }
-                if(!articles || articles.length <= 0){
-    
-                    return response.status(404).send({
-                        message : 'error',
-                        message : 'no hay articulos para mostras'
-                    });
-    
-                }
-                return response.status(200).send({
-                    message : 'successfull',
-                    articles
                 });
-            });
         } catch (error) {
             return response.status(404).send({
-                message : 'error',
-                message : 'error en la peticion'
+                message: 'error',
+                message: 'error en la peticion'
             });
         }
-        
+
     }
 };
 
