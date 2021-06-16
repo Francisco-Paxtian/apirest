@@ -213,8 +213,8 @@ var controller = {
     },
     upload_image:  (req, res) => {
 
-        console.log(req);
-        res.json({ status: req.file })
+        console.log(req.files);
+        res.json({ status: req.files })
         //var img = fs.readFileSync(req.file.path);
         //var encode_image = img.toString('base64');                
         //res.json({ status: req.body})
